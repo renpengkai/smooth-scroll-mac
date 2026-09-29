@@ -24,6 +24,14 @@ cp "$BIN_DIR/$NAME" "$APP/Contents/MacOS/$NAME"
 # 去掉调试符号和本地符号, 可执行文件只保留动态链接需要的符号
 strip -S -x "$APP/Contents/MacOS/$NAME"
 
+# SwiftPM 链接时把 LC_BUILD_VERSION 的 sdk 写成部署目标 (13.0), 系统据此按旧 SDK 兼容模式运行,
+# 不会启用液态玻璃; 改写为实际编译所用的 SDK 版本
+SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
+vtool -set-build-version macos 13.0 "$SDK_VERSION" -replace \
+    -output "$DIST/$NAME.tmp" "$APP/Contents/MacOS/$NAME"
+mv "$DIST/$NAME.tmp" "$APP/Contents/MacOS/$NAME"
+chmod +x "$APP/Contents/MacOS/$NAME"
+
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" \
     "$ROOT/Packaging/Info.plist" > "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
