@@ -26,15 +26,27 @@
 
 点击鼠标左键会立即停住惯性。触控板、Magic Mouse、远程桌面已平滑过的事件原样放行。
 
-## 获取安装包
+## 用 Homebrew 安装（推荐）
 
-1. 推送到 GitHub 后，Actions 的 `build-macos` 会自动运行。
-2. 在该次运行页面底部的 **Artifacts** 下载 `SmoothScroll`，解压得到 `SmoothScroll-<版本>.zip`，再解压出 `SmoothScroll.app`。
-3. 推送 `v*` 标签（例如 `git tag v0.1.0 && git push origin v0.1.0`）会同时发布到 Releases。
+```bash
+brew install --cask renpengkai/tap/smoothscroll
+```
+
+Cask 放在 [renpengkai/homebrew-tap](https://github.com/renpengkai/homebrew-tap)，安装时会自动去掉隔离属性，装完直接打开就行，然后按下面第 3 步授权。升级与卸载：
+
+```bash
+brew upgrade --cask smoothscroll      # 升级后需要重新授权, 见下文
+brew uninstall --cask smoothscroll    # 加 --zap 同时删除设置
+```
+
+## 手动获取安装包
+
+- 正式版本：[Releases](https://github.com/renpengkai/smooth-scroll-mac/releases) 下载 `SmoothScroll-<版本>.zip`。
+- 开发构建：每次推送 `main`，Actions 的 `build-macos` 都会构建，在该次运行页面底部的 **Artifacts** 下载。
 
 ## 安装与授权
 
-1. 把 `SmoothScroll.app` 拖进「应用程序」。
+1. 把 `SmoothScroll.app` 拖进「应用程序」（Homebrew 安装可跳过第 1、2 步）。
 2. 包只做了 ad-hoc 签名、未公证，首次打开会被 Gatekeeper 拦截。可以右键 App 选择「打开」，或在终端执行：
 
    ```bash
@@ -59,6 +71,18 @@
 - [ ] 按住左 Command 滚动：Safari/预览里的缩放正常
 - [ ] 菜单关闭「平滑滚动」后恢复系统原生逐格滚动
 - [ ] 外接高刷显示器上不卡顿（插拔显示器、休眠唤醒后仍然顺滑）
+
+## 发布新版本
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+`build-macos` 会构建并发布 Release。tap 仓库每 6 小时自动把 Cask 同步到最新 Release；想立即同步可以手动触发：
+
+```bash
+gh workflow run update-smoothscroll.yml -R renpengkai/homebrew-tap
+```
 
 ## 本地构建（可选）
 
