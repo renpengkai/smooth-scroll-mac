@@ -1,0 +1,20 @@
+SmoothScroll
+
+This project contains material adapted from Mos
+  https://github.com/Caldis/Mos
+  Copyright (c) Caldis
+  Licensed under CC BY-NC 4.0: https://creativecommons.org/licenses/by-nc/4.0/
+
+Adapted files (Sources/SmoothScroll/ScrollCore/):
+  Interceptor.swift, ScrollCore.swift, ScrollDispatchContext.swift, ScrollEvent.swift,
+  ScrollFilter.swift, ScrollPhase.swift, ScrollPoster.swift, ScrollUtils.swift
+
+Changes: removed per-application profiles, custom hotkeys, button bindings, Logitech
+HID++ support and debug diagnostics; scroll configuration is passed to the poster as a
+snapshot; hotkeys are fixed to Mos defaults; the peak filter keeps only the two window
+slots that are read (output unchanged).
+
+Default scroll parameters (step 33.6, speed 2.70, duration 4.35, dead zone 1.0) are
+taken from Mos.
+
+This project is not affiliated with or endorsed by the Mos authors.
