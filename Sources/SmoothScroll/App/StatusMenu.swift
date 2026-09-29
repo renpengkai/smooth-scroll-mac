@@ -38,24 +38,37 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     }
 
     private func buildMenu() {
-        for (item, action) in [
-            (smoothItem, #selector(toggleSmooth)),
-            (reverseItem, #selector(toggleReverse)),
-            (simTrackpadItem, #selector(toggleSimTrackpad)),
+        for (item, action, symbol) in [
+            (smoothItem, #selector(toggleSmooth), "arrow.up.and.down.circle"),
+            (reverseItem, #selector(toggleReverse), "arrow.up.arrow.down"),
+            (simTrackpadItem, #selector(toggleSimTrackpad), "hand.draw"),
         ] {
             item.target = self
             item.action = action
+            setSymbol(item, symbol)
             menu.addItem(item)
         }
         menu.addItem(.separator())
 
-        stepView = SliderMenuView(title: "最小步长", range: Settings.stepRange, value: settings.step, format: "%.1f") { [weak self] in
+        if #available(macOS 14.0, *) {
+            menu.addItem(.sectionHeader(title: "滚动参数"))
+        }
+        stepView = SliderMenuView(
+            title: "最小步长", range: Settings.stepRange, value: settings.step,
+            neutralValue: Settings.defaultStep, format: "%.1f"
+        ) { [weak self] in
             self?.settings.step = $0
         }
-        speedView = SliderMenuView(title: "速度增益", range: Settings.speedRange, value: settings.speed, format: "%.2f") { [weak self] in
+        speedView = SliderMenuView(
+            title: "速度增益", range: Settings.speedRange, value: settings.speed,
+            neutralValue: Settings.defaultSpeed, format: "%.2f"
+        ) { [weak self] in
             self?.settings.speed = $0
         }
-        durationView = SliderMenuView(title: "惯性时长", range: Settings.durationRange, value: settings.duration, format: "%.2f") { [weak self] in
+        durationView = SliderMenuView(
+            title: "惯性时长", range: Settings.durationRange, value: settings.duration,
+            neutralValue: Settings.defaultDuration, format: "%.2f"
+        ) { [weak self] in
             self?.settings.duration = $0
         }
         for view in [stepView!, speedView!, durationView!] {
@@ -63,26 +76,35 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             item.view = view
             menu.addItem(item)
         }
-        addItem("恢复默认参数", #selector(resetParameters))
+        addItem("恢复默认参数", #selector(resetParameters), symbol: "arrow.counterclockwise")
         menu.addItem(.separator())
 
         permissionItem.target = self
         permissionItem.action = #selector(openAccessibilitySettings)
+        setSymbol(permissionItem, "accessibility")
         menu.addItem(permissionItem)
         loginItem.target = self
         loginItem.action = #selector(toggleLaunchAtLogin)
+        setSymbol(loginItem, "sunrise")
         menu.addItem(loginItem)
         menu.addItem(.separator())
 
-        addItem("平滑算法来自 Mos (CC BY-NC 4.0)", #selector(openMos))
-        addItem("退出 SmoothScroll", #selector(quit), key: "q")
+        addItem("平滑算法来自 Mos (CC BY-NC 4.0)", #selector(openMos), symbol: "info.circle")
+        addItem("退出 SmoothScroll", #selector(quit), key: "q", symbol: "power")
         refresh()
     }
 
-    private func addItem(_ title: String, _ action: Selector, key: String = "") {
+    private func addItem(_ title: String, _ action: Selector, key: String = "", symbol: String) {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
         item.target = self
+        setSymbol(item, symbol)
         menu.addItem(item)
+    }
+
+    /// macOS 26 起系统菜单普遍为操作配图标 (同一分组内图标成一列); 更早的系统保持无图标的传统样式
+    private func setSymbol(_ item: NSMenuItem, _ name: String) {
+        guard #available(macOS 26.0, *) else { return }
+        item.image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
     }
 
     func menuWillOpen(_ menu: NSMenu) {
