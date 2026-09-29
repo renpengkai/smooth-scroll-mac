@@ -40,3 +40,5 @@ echo "== size =="
 du -sh "$APP"
 ls -l "$APP/Contents/MacOS/$NAME" "$ZIP"
 file "$APP/Contents/MacOS/$NAME"
+# sdk 决定是否启用液态玻璃 (需 26+), minos 决定最低可运行系统
+vtool -show-build "$APP/Contents/MacOS/$NAME"

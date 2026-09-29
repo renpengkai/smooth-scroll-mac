@@ -6,7 +6,8 @@
 
 - 仅支持 Apple Silicon，macOS 13+
 - 零第三方依赖，没有资源文件，界面只有一个菜单栏菜单
-- 本地不需要 Xcode：由 GitHub Actions 的 macOS runner 编译打包
+- 本地不需要 Xcode：由 GitHub Actions 的 `xcode-27` runner 编译打包
+- 适配 macOS 26/27 液态玻璃：用 macOS 27 SDK 构建，菜单为玻璃材质、操作带 SF Symbol 图标，滑块从 Mos 默认值向两侧填充；macOS 13–15 保持传统外观
 
 ## 功能
 
