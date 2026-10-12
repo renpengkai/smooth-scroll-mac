@@ -76,7 +76,11 @@ def main() -> None:
         px = size * scale
         suffix = "@2x" if scale == 2 else ""
         name = f"icon_{size}x{size}{suffix}.png"
-        draw_icon(px).save(ROOT / name, optimize=True)
+        # iconutil 对带 alpha 的 PNG 有时会报 Invalid Iconset, 压成不透明 RGB
+        icon = draw_icon(px)
+        flat = Image.new("RGB", (px, px), (58, 120, 255))
+        flat.paste(icon, mask=icon.split()[3])
+        flat.save(ROOT / name, format="PNG")
         print(name, px)
 
 
