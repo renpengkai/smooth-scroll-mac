@@ -5,7 +5,7 @@
 平滑算法移植自 [Mos](https://github.com/Caldis/Mos) 的 `ScrollCore`（事件拦截、轴归一化、峰值滤波、指数插值、`CVDisplayLink` 逐帧派发、触控板 phase 模拟），默认参数与 Mos 一致，因此手感与 Mos 的「平滑滚动」相同。Mos 的其余功能（按键绑定、Logi HID++、按应用配置、偏好窗口、自动更新等）全部去掉，以换取体积。
 
 - 仅支持 Apple Silicon，macOS 13+
-- 零第三方依赖，没有资源文件，界面只有一个菜单栏菜单
+- 零第三方依赖，界面只有一个菜单栏菜单；打包时附带 `AppIcon.icns`（Finder / 辅助功能列表等系统界面显示）
 - 本地不需要 Xcode：由 GitHub Actions 的 `xcode-27` runner 编译打包
 - 适配 macOS 26/27 液态玻璃：用 macOS 27 SDK 构建，菜单为玻璃材质、操作带 SF Symbol 图标，滑块从 Mos 默认值向两侧填充；macOS 13–15 保持传统外观
 
@@ -100,7 +100,9 @@ Sources/SmoothScroll/
   ScrollCore/   移植自 Mos 的滚动热路径
   App/          菜单栏界面、设置、授权流程
 Packaging/Info.plist
+Packaging/AppIcon.appiconset/
 scripts/package-app.sh
+scripts/generate-app-icon.py
 .github/workflows/build-macos.yml
 ```
 

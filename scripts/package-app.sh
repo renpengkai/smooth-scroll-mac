@@ -37,6 +37,9 @@ sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" \
 plutil -lint "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
+mkdir -p "$APP/Contents/Resources"
+iconutil -c icns "$ROOT/Packaging/AppIcon.appiconset" -o "$APP/Contents/Resources/AppIcon.icns"
+
 # ad-hoc 签名: Apple Silicon 要求可执行文件至少有签名才能运行
 codesign --force --sign - --timestamp=none "$APP"
 codesign --verify --strict --verbose=2 "$APP"
