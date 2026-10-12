@@ -38,7 +38,13 @@ plutil -lint "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 mkdir -p "$APP/Contents/Resources"
-iconutil -c icns "$ROOT/Packaging/AppIcon.appiconset" -o "$APP/Contents/Resources/AppIcon.icns"
+# iconutil 只认 .iconset (按文件名排列的 PNG), 不能直接对 Xcode 的 .appiconset 转换
+ICONSET="$DIST/AppIcon.iconset"
+rm -rf "$ICONSET"
+mkdir -p "$ICONSET"
+cp "$ROOT/Packaging/AppIcon.appiconset"/icon_*.png "$ICONSET/"
+iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+rm -rf "$ICONSET"
 
 # ad-hoc 签名: Apple Silicon 要求可执行文件至少有签名才能运行
 codesign --force --sign - --timestamp=none "$APP"
