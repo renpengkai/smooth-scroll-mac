@@ -18,6 +18,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let simTrackpadItem = NSMenuItem(title: "模拟触控板", action: nil, keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let loginItem = NSMenuItem(title: "登录时启动", action: nil, keyEquivalent: "")
+    private let menuBarItem = NSMenuItem(title: "显示在菜单栏", action: nil, keyEquivalent: "")
     private var stepView: SliderMenuView!
     private var speedView: SliderMenuView!
     private var durationView: SliderMenuView!
@@ -35,6 +36,17 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         buildMenu()
         menu.delegate = self
         statusItem.menu = menu
+        applyMenuBarVisibility()
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(showMenuBarFromExternal),
+            name: .showMenuBarRequested,
+            object: nil
+        )
+    }
+
+    deinit {
+        DistributedNotificationCenter.default().removeObserver(self)
     }
 
     private func buildMenu() {
@@ -87,6 +99,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         loginItem.action = #selector(toggleLaunchAtLogin)
         setSymbol(loginItem, "sunrise")
         menu.addItem(loginItem)
+        menuBarItem.target = self
+        menuBarItem.action = #selector(toggleShowInMenuBar)
+        setSymbol(menuBarItem, "menubar.rectangle")
+        menu.addItem(menuBarItem)
         menu.addItem(.separator())
 
         addItem("平滑算法来自 Mos (CC BY-NC 4.0)", #selector(openMos), symbol: "info.circle")
@@ -116,6 +132,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         reverseItem.state = settings.reverse ? .on : .off
         simTrackpadItem.state = settings.simTrackpad ? .on : .off
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        menuBarItem.state = settings.showInMenuBar ? .on : .off
         let trusted = AXIsProcessTrusted()
         permissionItem.title = trusted ? "辅助功能权限：已授权" : "辅助功能权限：未授权（点此前往设置）"
         permissionItem.isEnabled = !trusted
@@ -148,6 +165,23 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
+    }
+
+    private func applyMenuBarVisibility() {
+        statusItem.isVisible = settings.showInMenuBar
+    }
+
+    @objc private func toggleShowInMenuBar() {
+        settings.showInMenuBar.toggle()
+        applyMenuBarVisibility()
+        refresh()
+    }
+
+    @objc private func showMenuBarFromExternal() {
+        guard !settings.showInMenuBar else { return }
+        settings.showInMenuBar = true
+        applyMenuBarVisibility()
+        refresh()
     }
 
     @objc private func toggleLaunchAtLogin() {

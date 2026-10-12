@@ -12,6 +12,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var permissionTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if handOffToExistingInstanceIfNeeded() { return }
+
         statusMenu = StatusMenu()
         startWhenTrusted(prompt: true)
 
@@ -38,6 +40,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         ScrollCore.shared.disable()
+    }
+
+    /// 无 Dock 图标时用户只能再次打开 .app; 若已在运行则激活旧实例并重新显示菜单栏
+    private func handOffToExistingInstanceIfNeeded() -> Bool {
+        guard let bundleId = Bundle.main.bundleIdentifier else { return false }
+        let pid = ProcessInfo.processInfo.processIdentifier
+        guard let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleId)
+            .first(where: { $0.processIdentifier != pid })
+        else { return false }
+
+        DistributedNotificationCenter.default().post(name: .showMenuBarRequested, object: nil)
+        existing.activate(options: [.activateIgnoringOtherApps])
+        NSApp.terminate(nil)
+        return true
     }
 
     /// 已授权则立即启动; 否则 (可选) 弹出系统授权提示, 并轮询直到用户在系统设置里勾选
