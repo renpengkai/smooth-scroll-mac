@@ -6,11 +6,6 @@
 
 import Foundation
 
-extension Notification.Name {
-    /// 已有实例在后台运行时, 用户再次打开 App 时发出, 用于重新显示菜单栏图标
-    static let showMenuBarRequested = Notification.Name("io.github.renpengkai.smoothscroll.showMenuBar")
-}
-
 /// 仅主线程读写; CVDisplayLink 线程通过 PosterConfig 快照读取
 final class Settings {
 
@@ -61,7 +56,7 @@ final class Settings {
             durationTransition = Self.transition(for: duration)
         }
     }
-    /// 是否在菜单栏显示图标; 关闭后平滑滚动仍后台运行, 再次打开 App 可恢复图标
+    /// 是否在菜单栏显示图标; 关闭后平滑滚动仍后台运行, 并临时显示 Dock 图标以便再次打开
     var showInMenuBar: Bool {
         didSet { UserDefaults.standard.set(showInMenuBar, forKey: Key.showInMenuBar) }
     }

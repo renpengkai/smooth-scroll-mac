@@ -37,16 +37,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.delegate = self
         statusItem.menu = menu
         applyMenuBarVisibility()
-        DistributedNotificationCenter.default().addObserver(
-            self,
-            selector: #selector(showMenuBarFromExternal),
-            name: .showMenuBarRequested,
-            object: nil
-        )
-    }
-
-    deinit {
-        DistributedNotificationCenter.default().removeObserver(self)
     }
 
     private func buildMenu() {
@@ -167,17 +157,24 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
     }
 
+    /// 隐藏菜单栏时改为 .regular 显示 Dock 图标, 否则用户无法再次打开界面
     private func applyMenuBarVisibility() {
         statusItem.isVisible = settings.showInMenuBar
+        NSApp.setActivationPolicy(settings.showInMenuBar ? .accessory : .regular)
     }
 
     @objc private func toggleShowInMenuBar() {
         settings.showInMenuBar.toggle()
         applyMenuBarVisibility()
+        if !settings.showInMenuBar {
+            // 让 Dock 图标立刻出现并被注意到, 便于用户之后点回来
+            NSApp.activate(ignoringOtherApps: true)
+        }
         refresh()
     }
 
-    @objc private func showMenuBarFromExternal() {
+    /// 再次打开 App / 点击 Dock 时调用: 恢复菜单栏并回到纯菜单栏形态
+    func restoreMenuBarIfHidden() {
         guard !settings.showInMenuBar else { return }
         settings.showInMenuBar = true
         applyMenuBarVisibility()

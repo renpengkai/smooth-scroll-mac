@@ -12,8 +12,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var permissionTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if handOffToExistingInstanceIfNeeded() { return }
-
         statusMenu = StatusMenu()
         startWhenTrusted(prompt: true)
 
@@ -42,17 +40,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ScrollCore.shared.disable()
     }
 
-    /// 无 Dock 图标时用户只能再次打开 .app; 若已在运行则激活旧实例并重新显示菜单栏
-    private func handOffToExistingInstanceIfNeeded() -> Bool {
-        guard let bundleId = Bundle.main.bundleIdentifier else { return false }
-        let pid = ProcessInfo.processInfo.processIdentifier
-        guard let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleId)
-            .first(where: { $0.processIdentifier != pid })
-        else { return false }
-
-        DistributedNotificationCenter.default().post(name: .showMenuBarRequested, object: nil)
-        existing.activate(options: [.activateIgnoringOtherApps])
-        NSApp.terminate(nil)
+    /// 用户再次打开已在运行的 App (Dock / Finder / open) 时恢复菜单栏
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        statusMenu?.restoreMenuBarIfHidden()
         return true
     }
 
