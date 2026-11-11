@@ -22,6 +22,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private var stepView: SliderMenuView!
     private var speedView: SliderMenuView!
     private var durationView: SliderMenuView!
+    private let buttonMenu = ButtonMenu()
 
     override init() {
         super.init()
@@ -79,6 +80,12 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             menu.addItem(item)
         }
         addItem("恢复默认参数", #selector(resetParameters), symbol: "arrow.counterclockwise")
+        menu.addItem(.separator())
+
+        let buttonsItem = NSMenuItem(title: "自定义鼠标按键", action: nil, keyEquivalent: "")
+        buttonsItem.submenu = buttonMenu.menu
+        setSymbol(buttonsItem, "computermouse")
+        menu.addItem(buttonsItem)
         menu.addItem(.separator())
 
         permissionItem.target = self

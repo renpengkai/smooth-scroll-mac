@@ -28,6 +28,8 @@ final class Settings {
         static let speed = "speed"
         static let duration = "duration"
         static let showInMenuBar = "showInMenuBar"
+        static let buttonBindings = "buttonBindings"
+        static let extraButtons = "extraButtons"
     }
 
     var smooth: Bool {
@@ -60,6 +62,14 @@ final class Settings {
     var showInMenuBar: Bool {
         didSet { UserDefaults.standard.set(showInMenuBar, forKey: Key.showInMenuBar) }
     }
+    /// 鼠标按键 (CGEvent 按键编号, 中键为 2) 到动作的映射; 不在表中的按键保持系统默认行为
+    var buttonBindings: [Int: ButtonAction] {
+        didSet { UserDefaults.standard.set(try? JSONEncoder().encode(buttonBindings), forKey: Key.buttonBindings) }
+    }
+    /// 通过「添加其他按键」录入的按键编号 (中键与两个侧键固定显示, 不在此列)
+    var extraButtons: [Int] {
+        didSet { UserDefaults.standard.set(extraButtons, forKey: Key.extraButtons) }
+    }
     /// 由 duration 换算出的每帧插值系数
     private(set) var durationTransition: Double
 
@@ -82,6 +92,9 @@ final class Settings {
         duration = defaults.double(forKey: Key.duration)
         durationTransition = Self.transition(for: defaults.double(forKey: Key.duration))
         showInMenuBar = defaults.bool(forKey: Key.showInMenuBar)
+        buttonBindings = defaults.data(forKey: Key.buttonBindings)
+            .flatMap { try? JSONDecoder().decode([Int: ButtonAction].self, from: $0) } ?? [:]
+        extraButtons = defaults.array(forKey: Key.extraButtons) as? [Int] ?? []
     }
 
     func resetScrollParameters() {

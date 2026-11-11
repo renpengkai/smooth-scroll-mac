@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            ScrollCore.shared.disable()
+            self?.disableCores()
             self?.startWhenTrusted(prompt: false)
         }
         NotificationCenter.default.addObserver(
@@ -30,14 +30,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(
             forName: .accessibilityPermissionLost, object: nil, queue: .main
         ) { [weak self] _ in
-            ScrollCore.shared.disable()
+            self?.disableCores()
             self?.statusMenu?.refresh()
             self?.startWhenTrusted(prompt: false)
         }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        ScrollCore.shared.disable()
+        disableCores()
     }
 
     /// 用户再次打开已在运行的 App (Dock / Finder / open) 时恢复菜单栏
@@ -46,12 +46,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    private func enableCores() {
+        ScrollCore.shared.enable()
+        ButtonCore.shared.enable()
+    }
+
+    private func disableCores() {
+        ScrollCore.shared.disable()
+        ButtonCore.shared.disable()
+    }
+
     /// 已授权则立即启动; 否则 (可选) 弹出系统授权提示, 并轮询直到用户在系统设置里勾选
     private func startWhenTrusted(prompt: Bool) {
         permissionTimer?.invalidate()
         permissionTimer = nil
         if AXIsProcessTrusted() {
-            ScrollCore.shared.enable()
+            enableCores()
             statusMenu?.refresh()
             return
         }
@@ -65,7 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard AXIsProcessTrusted() else { return }
             timer.invalidate()
             self?.permissionTimer = nil
-            ScrollCore.shared.enable()
+            self?.enableCores()
             self?.statusMenu?.refresh()
         }
     }

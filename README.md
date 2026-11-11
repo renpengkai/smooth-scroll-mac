@@ -17,6 +17,7 @@
 | 反转鼠标滚动方向 | 默认开启（与 Mos 一致）：系统「自然滚动」开着时，鼠标滚轮恢复传统方向，触控板不受影响 |
 | 模拟触控板 | 给合成事件附带触控板 phase，部分应用会出现回弹等触控板效果 |
 | 最小步长 / 速度增益 / 惯性时长 | 对应 Mos 的 step / speed / duration，默认 33.6 / 2.70 / 4.35 |
+| 自定义鼠标按键 | 给中键、两个侧键（或通过「添加其他按键…」识别的更多按键）绑定动作：后退 / 前进、调度中心、应用程序窗口、显示桌面、切换左右桌面，或录制任意快捷键；设为「默认」则保持系统行为 |
 | 登录时启动 | 需要先把 App 放进「应用程序」文件夹 |
 | 显示在菜单栏 | 关闭后图标隐藏并临时出现 Dock 图标，平滑滚动仍在后台运行；点 Dock 或再次打开 App 可恢复菜单 |
 
@@ -99,6 +100,7 @@ gh workflow run update-smoothscroll.yml -R renpengkai/homebrew-tap
 ```
 Sources/SmoothScroll/
   ScrollCore/   移植自 Mos 的滚动热路径
+  Buttons/      鼠标按键拦截与动作执行
   App/          菜单栏界面、设置、授权流程
 Packaging/Info.plist
 Packaging/AppIcon.appiconset/
