@@ -71,38 +71,47 @@ enum ButtonAction: Codable, Equatable {
         switch self {
         case .back: KeyPoster.post(33, .maskCommand)
         case .forward: KeyPoster.post(30, .maskCommand)
-        case .missionControl: Self.openMissionControl()
-        case .appWindows: Self.openMissionControl("2")
-        case .showDesktop: Self.openMissionControl("1")
+        case .missionControl: Self.sendDockNotification("com.apple.expose.awake", fallbackKey: 126, .maskControl)
+        case .appWindows: Self.sendDockNotification("com.apple.expose.front.awake", fallbackKey: 125, .maskControl)
+        case .showDesktop: Self.sendDockNotification("com.apple.showdesktop.awake", fallbackKey: 103, [])
         case .spaceLeft: KeyPoster.post(123, .maskControl)
         case .spaceRight: KeyPoster.post(124, .maskControl)
         case .shortcut(let shortcut): KeyPoster.post(shortcut.keyCode, CGEventFlags(rawValue: shortcut.flags))
         }
     }
 
-    /// 调度中心 App 的参数: 无参数为调度中心, 1 为显示桌面, 2 为当前应用的所有窗口
-    private static func openMissionControl(_ argument: String? = nil) {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/System/Applications/Mission Control.app/Contents/MacOS/Mission Control")
-        process.arguments = argument.map { [$0] } ?? []
-        do {
-            try process.run()
-        } catch {
-            NSLog("SmoothScroll: launch Mission Control failed: %@", String(describing: error))
+    private typealias CoreDockSendNotification = @convention(c) (CFString, Int32) -> Void
+
+    /// HIServices 的私有函数; 直接运行 Mission Control.app 的可执行文件会被系统的启动约束杀掉, 不能用
+    private static let coreDockSendNotification: CoreDockSendNotification? = {
+        let rtldDefault = UnsafeMutableRawPointer(bitPattern: -2)
+        guard let symbol = dlsym(rtldDefault, "CoreDockSendNotification") else { return nil }
+        return unsafeBitCast(symbol, to: CoreDockSendNotification.self)
+    }()
+
+    /// 私有函数不可用时退回系统默认快捷键 (⌃↑ 调度中心, ⌃↓ 应用程序窗口, F11 显示桌面)
+    private static func sendDockNotification(_ name: String, fallbackKey: UInt16, _ flags: CGEventFlags) {
+        if let send = coreDockSendNotification {
+            send(name as CFString, 0)
+        } else {
+            KeyPoster.post(fallbackKey, flags)
         }
     }
 }
 
 enum KeyPoster {
     private static let arrowKeys: Set<UInt16> = [123, 124, 125, 126]
-    private static let navigationKeys: Set<UInt16> = [115, 116, 117, 119, 121]
+    private static let fnKeys: Set<UInt16> = [
+        115, 116, 117, 119, 121,
+        122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,
+    ]
 
     static func post(_ keyCode: UInt16, _ flags: CGEventFlags) {
         var flags = flags
         // 与真实键盘一致: 方向键带 fn + 小键盘标记, 否则「⌃← 切换桌面」等系统快捷键不响应
         if arrowKeys.contains(keyCode) {
             flags.formUnion([.maskSecondaryFn, .maskNumericPad])
-        } else if navigationKeys.contains(keyCode) {
+        } else if fnKeys.contains(keyCode) {
             flags.insert(.maskSecondaryFn)
         }
         let source = CGEventSource(stateID: .hidSystemState)

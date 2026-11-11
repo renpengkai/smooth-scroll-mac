@@ -106,7 +106,7 @@ private let scrollCallback: CGEventTapCallBack = { _, type, event, _ in
     // 自己合成的平滑事件不能再进平滑管线
     if ScrollUtils.isSyntheticSmoothEvent(event) { return passthrough }
 
-    var scrollEvent = ScrollEvent(with: event)
+    let scrollEvent = ScrollEvent(with: event)
     // Magic Mouse 的滚动特征与触控板一致, 同样不处理
     if scrollEvent.isTrackpad { return passthrough }
     if ScrollUtils.shared.isRemoteSmoothedEvent(event) { return passthrough }
@@ -115,12 +115,6 @@ private let scrollCallback: CGEventTapCallBack = { _, type, event, _ in
     let core = ScrollCore.shared
     let hasVertical = scrollEvent.y.valid && scrollEvent.y.usableValue != 0.0
     let hasHorizontal = scrollEvent.x.valid && scrollEvent.x.usableValue != 0.0
-
-    // 方向翻转先于平滑, 这样按住 Command 关闭平滑时方向依然一致
-    if settings.reverse {
-        if hasVertical { scrollEvent.reverseY() }
-        if hasHorizontal { scrollEvent.reverseX() }
-    }
 
     let targetApplication = ScrollUtils.shared.runningApplication(from: event)
     guard settings.smooth,
@@ -138,7 +132,7 @@ private let scrollCallback: CGEventTapCallBack = { _, type, event, _ in
         transition: settings.durationTransition,
         speed: settings.speed,
         amplification: core.dashAmplification,
-        simTrackpad: settings.simTrackpad,
+        simTrackpad: false,
         deadZone: Settings.deadZone,
         targetIsChrome: targetApplication?.bundleIdentifier == "com.google.Chrome"
     )

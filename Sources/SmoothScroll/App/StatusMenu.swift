@@ -14,8 +14,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let settings = Settings.shared
 
     private let smoothItem = NSMenuItem(title: "平滑滚动", action: nil, keyEquivalent: "")
-    private let reverseItem = NSMenuItem(title: "反转鼠标滚动方向", action: nil, keyEquivalent: "")
-    private let simTrackpadItem = NSMenuItem(title: "模拟触控板", action: nil, keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let loginItem = NSMenuItem(title: "登录时启动", action: nil, keyEquivalent: "")
     private let menuBarItem = NSMenuItem(title: "显示在菜单栏", action: nil, keyEquivalent: "")
@@ -41,16 +39,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     }
 
     private func buildMenu() {
-        for (item, action, symbol) in [
-            (smoothItem, #selector(toggleSmooth), "arrow.up.and.down.circle"),
-            (reverseItem, #selector(toggleReverse), "arrow.up.arrow.down"),
-            (simTrackpadItem, #selector(toggleSimTrackpad), "hand.draw"),
-        ] {
-            item.target = self
-            item.action = action
-            setSymbol(item, symbol)
-            menu.addItem(item)
-        }
+        smoothItem.target = self
+        smoothItem.action = #selector(toggleSmooth)
+        setSymbol(smoothItem, "arrow.up.and.down.circle")
+        menu.addItem(smoothItem)
         menu.addItem(.separator())
 
         if #available(macOS 14.0, *) {
@@ -126,8 +118,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     func refresh() {
         smoothItem.state = settings.smooth ? .on : .off
-        reverseItem.state = settings.reverse ? .on : .off
-        simTrackpadItem.state = settings.simTrackpad ? .on : .off
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menuBarItem.state = settings.showInMenuBar ? .on : .off
         let trusted = AXIsProcessTrusted()
@@ -138,16 +128,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     @objc private func toggleSmooth() {
         settings.smooth.toggle()
-        refresh()
-    }
-
-    @objc private func toggleReverse() {
-        settings.reverse.toggle()
-        refresh()
-    }
-
-    @objc private func toggleSimTrackpad() {
-        settings.simTrackpad.toggle()
         refresh()
     }
 

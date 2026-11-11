@@ -22,8 +22,6 @@ final class Settings {
 
     private enum Key {
         static let smooth = "smooth"
-        static let reverse = "reverse"
-        static let simTrackpad = "simTrackpad"
         static let step = "step"
         static let speed = "speed"
         static let duration = "duration"
@@ -34,14 +32,6 @@ final class Settings {
 
     var smooth: Bool {
         didSet { UserDefaults.standard.set(smooth, forKey: Key.smooth) }
-    }
-    /// 翻转鼠标滚轮方向 (系统「自然滚动」同时作用于触控板和鼠标, Mos 默认对鼠标翻回来)
-    var reverse: Bool {
-        didSet { UserDefaults.standard.set(reverse, forKey: Key.reverse) }
-    }
-    /// 给合成事件附带触控板 phase, 让支持手势的应用 (如回弹、历史滑动) 当作触控板处理
-    var simTrackpad: Bool {
-        didSet { UserDefaults.standard.set(simTrackpad, forKey: Key.simTrackpad) }
     }
     /// 单格滚轮的最小像素位移
     var step: Double {
@@ -77,16 +67,12 @@ final class Settings {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [
             Key.smooth: true,
-            Key.reverse: true,
-            Key.simTrackpad: false,
             Key.step: Self.defaultStep,
             Key.speed: Self.defaultSpeed,
             Key.duration: Self.defaultDuration,
             Key.showInMenuBar: true,
         ])
         smooth = defaults.bool(forKey: Key.smooth)
-        reverse = defaults.bool(forKey: Key.reverse)
-        simTrackpad = defaults.bool(forKey: Key.simTrackpad)
         step = defaults.double(forKey: Key.step)
         speed = defaults.double(forKey: Key.speed)
         duration = defaults.double(forKey: Key.duration)

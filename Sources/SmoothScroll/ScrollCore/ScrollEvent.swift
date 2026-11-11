@@ -60,20 +60,6 @@ struct ScrollEvent {
         return data
     }
 
-    mutating func reverseY() {
-        event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: -y.scrollFix)
-        event.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: -y.scrollPt)
-        event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1, value: -y.scrollFixPt)
-        y.usableValue = -y.usableValue
-    }
-
-    mutating func reverseX() {
-        event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: -x.scrollFix)
-        event.setDoubleValueField(.scrollWheelEventPointDeltaAxis2, value: -x.scrollPt)
-        event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2, value: -x.scrollFixPt)
-        x.usableValue = -x.usableValue
-    }
-
     /// 单格滚轮位移不足 step 时抬升到 step, 保证每一格都有可感知的滚动距离
     static func normalized(_ value: Double, step: Double) -> Double {
         let magnitude = max(value.magnitude, step)
